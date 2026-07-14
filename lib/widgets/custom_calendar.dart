@@ -222,15 +222,16 @@ class CalendarDayWidget extends StatelessWidget {
     return Expanded(
       child: Center(
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 6.0),
+          width: 45,
+          height: 45,
           decoration: isToday
               ? BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(8),
                 )
               : null,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+          child: Stack(
+            alignment: Alignment.center,
             children: [
               Text(
                 currentDay.day.toString(),
@@ -242,22 +243,25 @@ class CalendarDayWidget extends StatelessWidget {
                 ),
               ),
               if (count > 0)
-                Padding(
-                  padding: const EdgeInsets.only(top: 2.0),
+                Positioned(
+                  bottom: 2,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: List.generate(
-                      count > 4 ? 4 : count,
-                      (index) => Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 1.0),
-                        width: 4,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: isToday ? Colors.black54 : Colors.blueAccent,
-                          shape: BoxShape.circle,
+                    children: List.generate(count > 4 ? 4 : count, (index) {
+                      bool isLast = index == (count > 4 ? 4 : count) - 1;
+                      return Align(
+                        widthFactor: isLast ? 1.0 : 0.6,
+                        child: Container(
+                          width: 10,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            color: isToday ? Colors.black54 : Colors.blueAccent,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 1),
+                          ),
                         ),
-                      ),
-                    ),
+                      );
+                    }),
                   ),
                 ),
             ],

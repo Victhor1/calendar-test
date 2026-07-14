@@ -60,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final Map<DateTime, int> dummyEvents = {
       DateTime(DateTime.now().year, DateTime.now().month, 15): 3,
       DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day):
-          1,
+          4,
     };
 
     return Scaffold(
@@ -98,32 +98,17 @@ class _MyHomePageState extends State<MyHomePage> {
                 color: Colors.blue.withValues(alpha: .5),
                 borderRadius: BorderRadius.circular(10),
               ),
-              // child: Padding(
-              //   padding: const EdgeInsets.symmetric(vertical: 10.0),
-              //   child: _showFullCalendar
-              //       ? CustomCalendar.month(
-              //           key: const ValueKey('month_calendar'),
-              //           eventsCount: dummyEvents,
-              //         )
-              //       : CustomCalendar.week(
-              //           key: const ValueKey('week_calendar'),
-              //           eventsCount: dummyEvents,
-              //         ),
-              // ),
-              child: Column(
-                children: [
-                  CustomCalendar.month(
-                    key: const ValueKey('month_calendar'),
-                    eventsCount: dummyEvents,
-                    scrollBackLimit: 4,
-                    scrollForwardLimit: 2,
-                  ),
-                  SizedBox(height: 40),
-                  CustomCalendar.week(
-                    key: const ValueKey('week_calendar'),
-                    eventsCount: dummyEvents,
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10.0),
+                child: _showFullCalendar
+                    ? CustomCalendar.month(
+                        key: const ValueKey('month_calendar'),
+                        eventsCount: dummyEvents,
+                      )
+                    : CustomCalendar.week(
+                        key: const ValueKey('week_calendar'),
+                        eventsCount: dummyEvents,
+                      ),
               ),
             ),
           ],
