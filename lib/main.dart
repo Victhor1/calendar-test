@@ -57,10 +57,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final Map<DateTime, int> dummyEvents = {
-      DateTime(DateTime.now().year, DateTime.now().month, 15): 3,
-      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day):
-          4,
+    final Map<DateTime, ({int count, Color color})> dummyEvents = {
+      DateTime(DateTime.now().year, DateTime.now().month, 15): (
+        count: 3,
+        color: Colors.purple,
+      ),
+      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day): (
+        count: 4,
+        color: Colors.orange,
+      ),
     };
 
     return Scaffold(
@@ -103,24 +108,28 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: _showFullCalendar
                     ? CustomCalendar.month(
                         key: const ValueKey('month_calendar'),
-                        eventsCount: dummyEvents,
+                        events: dummyEvents,
                         onPageChanged: (date) {
                           print('Mes actual: \${date.month} / \${date.year}');
                         },
                         onDaySelected: (date) {
-                          print('Día seleccionado: \${date.day}/\${date.month}/\${date.year}');
+                          print(
+                            'Día seleccionado: \${date.day}/\${date.month}/\${date.year}',
+                          );
                         },
                       )
                     : CustomCalendar.week(
                         key: const ValueKey('week_calendar'),
-                        eventsCount: dummyEvents,
+                        events: dummyEvents,
                         onPageChanged: (date) {
                           print(
                             'Semana actual empieza el: \${date.day}/\${date.month}/\${date.year}',
                           );
                         },
                         onDaySelected: (date) {
-                          print('Día seleccionado: \${date.day}/\${date.month}/\${date.year}');
+                          print(
+                            'Día seleccionado: \${date.day}/\${date.month}/\${date.year}',
+                          );
                         },
                       ),
               ),

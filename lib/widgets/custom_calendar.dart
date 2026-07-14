@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:test_calendar/widgets/calendar_day_widget.dart';
 
 class CustomCalendar extends StatefulWidget {
   final bool showFullCalendar;
-  final Map<DateTime, int>? eventsCount;
+  final Map<DateTime, ({int count, Color color})>? events;
   final int scrollBackLimit;
   final int scrollForwardLimit;
   final ValueChanged<DateTime>? onPageChanged;
@@ -10,7 +11,7 @@ class CustomCalendar extends StatefulWidget {
 
   const CustomCalendar.week({
     super.key,
-    this.eventsCount,
+    this.events,
     this.scrollBackLimit = 5000,
     this.scrollForwardLimit = 5000,
     this.onPageChanged,
@@ -19,7 +20,7 @@ class CustomCalendar extends StatefulWidget {
 
   const CustomCalendar.month({
     super.key,
-    this.eventsCount,
+    this.events,
     this.scrollBackLimit = 5000,
     this.scrollForwardLimit = 5000,
     this.onPageChanged,
@@ -166,7 +167,7 @@ class _CustomCalendarState extends State<CustomCalendar> {
                       currentDay: currentDay,
                       isToday: isToday,
                       isCurrentMonth: true,
-                      eventsCount: widget.eventsCount,
+                      events: widget.events,
                       onTap: widget.onDaySelected != null
                           ? () => widget.onDaySelected!(currentDay)
                           : null,
@@ -208,7 +209,7 @@ class _CustomCalendarState extends State<CustomCalendar> {
                               currentDay: currentDay,
                               isToday: isToday,
                               isCurrentMonth: isCurrentMonth,
-                              eventsCount: widget.eventsCount,
+                              events: widget.events,
                               onTap: widget.onDaySelected != null
                                   ? () => widget.onDaySelected!(currentDay)
                                   : null,
@@ -224,93 +225,6 @@ class _CustomCalendarState extends State<CustomCalendar> {
           ),
         ),
       ],
-    );
-  }
-}
-
-class CalendarDayWidget extends StatelessWidget {
-  final DateTime currentDay;
-  final bool isToday;
-  final bool isCurrentMonth;
-  final Map<DateTime, int>? eventsCount;
-  final VoidCallback? onTap;
-
-  const CalendarDayWidget({
-    super.key,
-    required this.currentDay,
-    required this.isToday,
-    required this.isCurrentMonth,
-    this.eventsCount,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    int count = 0;
-    if (eventsCount != null) {
-      DateTime key = DateTime(
-        currentDay.year,
-        currentDay.month,
-        currentDay.day,
-      );
-      count = eventsCount![key] ?? 0;
-    }
-
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: Center(
-          child: Container(
-            width: 45,
-            height: 45,
-            decoration: isToday
-                ? BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                  )
-                : null,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Text(
-                  currentDay.day.toString(),
-                  style: TextStyle(
-                    fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                    color: isCurrentMonth
-                        ? (isToday ? Colors.black : null)
-                        : Colors.grey.withValues(alpha: .5),
-                  ),
-                ),
-                if (count > 0)
-                  Positioned(
-                    bottom: 2,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: List.generate(count > 4 ? 4 : count, (index) {
-                        bool isLast = index == (count > 4 ? 4 : count) - 1;
-                        return Align(
-                          widthFactor: isLast ? 1.0 : 0.6,
-                          child: Container(
-                            width: 10,
-                            height: 10,
-                            decoration: BoxDecoration(
-                              color: isToday
-                                  ? Colors.black54
-                                  : Colors.blueAccent,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 1),
-                            ),
-                          ),
-                        );
-                      }),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
