@@ -104,10 +104,18 @@ class _MyHomePageState extends State<MyHomePage> {
                     ? CustomCalendar.month(
                         key: const ValueKey('month_calendar'),
                         eventsCount: dummyEvents,
+                        onPageChanged: (date) {
+                          print('Mes actual: \${date.month} / \${date.year}');
+                        },
                       )
                     : CustomCalendar.week(
                         key: const ValueKey('week_calendar'),
                         eventsCount: dummyEvents,
+                        onPageChanged: (date) {
+                          print(
+                            'Semana actual empieza el: \${date.day}/\${date.month}/\${date.year}',
+                          );
+                        },
                       ),
               ),
             ),

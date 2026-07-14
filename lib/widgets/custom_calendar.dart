@@ -5,12 +5,14 @@ class CustomCalendar extends StatefulWidget {
   final Map<DateTime, int>? eventsCount;
   final int scrollBackLimit;
   final int scrollForwardLimit;
+  final ValueChanged<DateTime>? onPageChanged;
 
   const CustomCalendar.week({
     super.key,
     this.eventsCount,
     this.scrollBackLimit = 5000,
     this.scrollForwardLimit = 5000,
+    this.onPageChanged,
   }) : showFullCalendar = false;
 
   const CustomCalendar.month({
@@ -18,6 +20,7 @@ class CustomCalendar extends StatefulWidget {
     this.eventsCount,
     this.scrollBackLimit = 5000,
     this.scrollForwardLimit = 5000,
+    this.onPageChanged,
   }) : showFullCalendar = true;
 
   @override
@@ -33,6 +36,11 @@ class _CustomCalendarState extends State<CustomCalendar> {
     super.initState();
     _currentPage = widget.scrollBackLimit;
     _pageController = PageController(initialPage: _currentPage);
+    if (widget.onPageChanged != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _notifyDateChanged(_currentPage);
+      });
+    }
   }
 
   @override
@@ -43,7 +51,24 @@ class _CustomCalendarState extends State<CustomCalendar> {
       _currentPage = widget.scrollBackLimit;
       _pageController.dispose();
       _pageController = PageController(initialPage: _currentPage);
+      if (widget.onPageChanged != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _notifyDateChanged(_currentPage);
+        });
+      }
     }
+  }
+
+  void _notifyDateChanged(int pageIndex) {
+    if (widget.onPageChanged == null) return;
+    DateTime now = DateTime.now();
+    int offset = now.weekday == 7 ? 0 : now.weekday;
+    DateTime sunday = now.subtract(Duration(days: offset));
+    int currentOffset = pageIndex - widget.scrollBackLimit;
+    DateTime currentTargetDate = widget.showFullCalendar
+        ? DateTime(now.year, now.month + currentOffset, 1)
+        : sunday.add(Duration(days: currentOffset * 7));
+    widget.onPageChanged!(currentTargetDate);
   }
 
   @override
@@ -118,6 +143,7 @@ class _CustomCalendarState extends State<CustomCalendar> {
               setState(() {
                 _currentPage = index;
               });
+              _notifyDateChanged(index);
             },
             itemBuilder: (context, pageIndex) {
               int pageOffset = pageIndex - widget.scrollBackLimit;
