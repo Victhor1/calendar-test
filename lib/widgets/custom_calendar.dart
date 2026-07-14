@@ -16,17 +16,19 @@ class CustomCalendar extends StatefulWidget {
 
 class _CustomCalendarState extends State<CustomCalendar> {
   late final PageController _pageController;
+  int _currentPage = 5000;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: 5000);
+    _pageController = PageController(initialPage: _currentPage);
   }
 
   @override
   void didUpdateWidget(CustomCalendar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.showFullCalendar != oldWidget.showFullCalendar) {
+      _currentPage = 5000;
       _pageController.jumpToPage(5000);
     }
   }
@@ -43,10 +45,41 @@ class _CustomCalendarState extends State<CustomCalendar> {
     int offset = now.weekday == 7 ? 0 : now.weekday;
     DateTime sunday = now.subtract(Duration(days: offset));
     List<String> dayNames = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
+    List<String> monthNames = [
+      'Enero',
+      'Febrero',
+      'Marzo',
+      'Abril',
+      'Mayo',
+      'Junio',
+      'Julio',
+      'Agosto',
+      'Septiembre',
+      'Octubre',
+      'Noviembre',
+      'Diciembre',
+    ];
+
+    int currentOffset = _currentPage - 5000;
+    DateTime currentTargetDate = widget.showFullCalendar
+        ? DateTime(now.year, now.month + currentOffset, 1)
+        : sunday.add(Duration(days: currentOffset * 7));
+
+    String currentMonthName = monthNames[currentTargetDate.month - 1];
+    String currentYear = currentTargetDate.year.toString();
 
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (widget.showFullCalendar)
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0, bottom: 10.0, top: 5.0),
+            child: Text(
+              '$currentMonthName $currentYear',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: List.generate(7, (index) {
@@ -67,6 +100,11 @@ class _CustomCalendarState extends State<CustomCalendar> {
           height: widget.showFullCalendar ? 240 : 40,
           child: PageView.builder(
             controller: _pageController,
+            onPageChanged: (index) {
+              setState(() {
+                _currentPage = index;
+              });
+            },
             itemBuilder: (context, pageIndex) {
               int pageOffset = pageIndex - 5000;
 
