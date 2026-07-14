@@ -6,6 +6,7 @@ class CustomCalendar extends StatefulWidget {
   final int scrollBackLimit;
   final int scrollForwardLimit;
   final ValueChanged<DateTime>? onPageChanged;
+  final ValueChanged<DateTime>? onDaySelected;
 
   const CustomCalendar.week({
     super.key,
@@ -13,6 +14,7 @@ class CustomCalendar extends StatefulWidget {
     this.scrollBackLimit = 5000,
     this.scrollForwardLimit = 5000,
     this.onPageChanged,
+    this.onDaySelected,
   }) : showFullCalendar = false;
 
   const CustomCalendar.month({
@@ -21,6 +23,7 @@ class CustomCalendar extends StatefulWidget {
     this.scrollBackLimit = 5000,
     this.scrollForwardLimit = 5000,
     this.onPageChanged,
+    this.onDaySelected,
   }) : showFullCalendar = true;
 
   @override
@@ -164,6 +167,9 @@ class _CustomCalendarState extends State<CustomCalendar> {
                       isToday: isToday,
                       isCurrentMonth: true,
                       eventsCount: widget.eventsCount,
+                      onTap: widget.onDaySelected != null
+                          ? () => widget.onDaySelected!(currentDay)
+                          : null,
                     );
                   }),
                 );
@@ -203,6 +209,9 @@ class _CustomCalendarState extends State<CustomCalendar> {
                               isToday: isToday,
                               isCurrentMonth: isCurrentMonth,
                               eventsCount: widget.eventsCount,
+                              onTap: widget.onDaySelected != null
+                                  ? () => widget.onDaySelected!(currentDay)
+                                  : null,
                             );
                           }),
                         ),
@@ -224,6 +233,7 @@ class CalendarDayWidget extends StatelessWidget {
   final bool isToday;
   final bool isCurrentMonth;
   final Map<DateTime, int>? eventsCount;
+  final VoidCallback? onTap;
 
   const CalendarDayWidget({
     super.key,
@@ -231,6 +241,7 @@ class CalendarDayWidget extends StatelessWidget {
     required this.isToday,
     required this.isCurrentMonth,
     this.eventsCount,
+    this.onTap,
   });
 
   @override
@@ -246,51 +257,57 @@ class CalendarDayWidget extends StatelessWidget {
     }
 
     return Expanded(
-      child: Center(
-        child: Container(
-          width: 45,
-          height: 45,
-          decoration: isToday
-              ? BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                )
-              : null,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Text(
-                currentDay.day.toString(),
-                style: TextStyle(
-                  fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                  color: isCurrentMonth
-                      ? (isToday ? Colors.black : null)
-                      : Colors.grey.withValues(alpha: .5),
-                ),
-              ),
-              if (count > 0)
-                Positioned(
-                  bottom: 2,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: List.generate(count > 4 ? 4 : count, (index) {
-                      bool isLast = index == (count > 4 ? 4 : count) - 1;
-                      return Align(
-                        widthFactor: isLast ? 1.0 : 0.6,
-                        child: Container(
-                          width: 10,
-                          height: 10,
-                          decoration: BoxDecoration(
-                            color: isToday ? Colors.black54 : Colors.blueAccent,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 1),
-                          ),
-                        ),
-                      );
-                    }),
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Center(
+          child: Container(
+            width: 45,
+            height: 45,
+            decoration: isToday
+                ? BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  )
+                : null,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Text(
+                  currentDay.day.toString(),
+                  style: TextStyle(
+                    fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                    color: isCurrentMonth
+                        ? (isToday ? Colors.black : null)
+                        : Colors.grey.withValues(alpha: .5),
                   ),
                 ),
-            ],
+                if (count > 0)
+                  Positioned(
+                    bottom: 2,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: List.generate(count > 4 ? 4 : count, (index) {
+                        bool isLast = index == (count > 4 ? 4 : count) - 1;
+                        return Align(
+                          widthFactor: isLast ? 1.0 : 0.6,
+                          child: Container(
+                            width: 10,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              color: isToday
+                                  ? Colors.black54
+                                  : Colors.blueAccent,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 1),
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

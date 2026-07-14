@@ -107,6 +107,9 @@ class _MyHomePageState extends State<MyHomePage> {
                         onPageChanged: (date) {
                           print('Mes actual: \${date.month} / \${date.year}');
                         },
+                        onDaySelected: (date) {
+                          print('Día seleccionado: \${date.day}/\${date.month}/\${date.year}');
+                        },
                       )
                     : CustomCalendar.week(
                         key: const ValueKey('week_calendar'),
@@ -115,6 +118,9 @@ class _MyHomePageState extends State<MyHomePage> {
                           print(
                             'Semana actual empieza el: \${date.day}/\${date.month}/\${date.year}',
                           );
+                        },
+                        onDaySelected: (date) {
+                          print('Día seleccionado: \${date.day}/\${date.month}/\${date.year}');
                         },
                       ),
               ),
