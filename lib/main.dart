@@ -57,6 +57,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final Map<DateTime, int> dummyEvents = {
+      DateTime(DateTime.now().year, DateTime.now().month, 15): 3,
+      DateTime(
+        DateTime.now().year,
+        DateTime.now().month,
+        DateTime.now().day,
+      ): 1,
+    };
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -94,17 +103,9 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10.0),
-                child: CustomCalendar(
-                  showFullCalendar: _showFullCalendar,
-                  eventsCount: {
-                    DateTime(DateTime.now().year, DateTime.now().month, 15): 3,
-                    DateTime(
-                      DateTime.now().year,
-                      DateTime.now().month,
-                      DateTime.now().day,
-                    ): 1,
-                  },
-                ),
+                child: _showFullCalendar
+                    ? CustomCalendar.month(eventsCount: dummyEvents)
+                    : CustomCalendar.week(eventsCount: dummyEvents),
               ),
             ),
           ],

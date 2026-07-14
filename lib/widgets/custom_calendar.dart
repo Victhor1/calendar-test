@@ -4,11 +4,15 @@ class CustomCalendar extends StatefulWidget {
   final bool showFullCalendar;
   final Map<DateTime, int>? eventsCount;
 
-  const CustomCalendar({
+  const CustomCalendar.week({
     super.key,
-    required this.showFullCalendar,
     this.eventsCount,
-  });
+  }) : showFullCalendar = false;
+
+  const CustomCalendar.month({
+    super.key,
+    this.eventsCount,
+  }) : showFullCalendar = true;
 
   @override
   State<CustomCalendar> createState() => _CustomCalendarState();
