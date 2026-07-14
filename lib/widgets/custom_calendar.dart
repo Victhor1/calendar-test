@@ -3,15 +3,21 @@ import 'package:flutter/material.dart';
 class CustomCalendar extends StatefulWidget {
   final bool showFullCalendar;
   final Map<DateTime, int>? eventsCount;
+  final int scrollBackLimit;
+  final int scrollForwardLimit;
 
   const CustomCalendar.week({
     super.key,
     this.eventsCount,
+    this.scrollBackLimit = 5000,
+    this.scrollForwardLimit = 5000,
   }) : showFullCalendar = false;
 
   const CustomCalendar.month({
     super.key,
     this.eventsCount,
+    this.scrollBackLimit = 5000,
+    this.scrollForwardLimit = 5000,
   }) : showFullCalendar = true;
 
   @override
@@ -19,21 +25,24 @@ class CustomCalendar extends StatefulWidget {
 }
 
 class _CustomCalendarState extends State<CustomCalendar> {
-  late final PageController _pageController;
-  int _currentPage = 5000;
+  late PageController _pageController;
+  late int _currentPage;
 
   @override
   void initState() {
     super.initState();
+    _currentPage = widget.scrollBackLimit;
     _pageController = PageController(initialPage: _currentPage);
   }
 
   @override
   void didUpdateWidget(CustomCalendar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.showFullCalendar != oldWidget.showFullCalendar) {
-      _currentPage = 5000;
-      _pageController.jumpToPage(5000);
+    if (widget.showFullCalendar != oldWidget.showFullCalendar ||
+        widget.scrollBackLimit != oldWidget.scrollBackLimit) {
+      _currentPage = widget.scrollBackLimit;
+      _pageController.dispose();
+      _pageController = PageController(initialPage: _currentPage);
     }
   }
 
@@ -64,7 +73,7 @@ class _CustomCalendarState extends State<CustomCalendar> {
       'Diciembre',
     ];
 
-    int currentOffset = _currentPage - 5000;
+    int currentOffset = _currentPage - widget.scrollBackLimit;
     DateTime currentTargetDate = widget.showFullCalendar
         ? DateTime(now.year, now.month + currentOffset, 1)
         : sunday.add(Duration(days: currentOffset * 7));
@@ -104,13 +113,14 @@ class _CustomCalendarState extends State<CustomCalendar> {
           height: widget.showFullCalendar ? 240 : 40,
           child: PageView.builder(
             controller: _pageController,
+            itemCount: widget.scrollBackLimit + 1 + widget.scrollForwardLimit,
             onPageChanged: (index) {
               setState(() {
                 _currentPage = index;
               });
             },
             itemBuilder: (context, pageIndex) {
-              int pageOffset = pageIndex - 5000;
+              int pageOffset = pageIndex - widget.scrollBackLimit;
 
               if (!widget.showFullCalendar) {
                 return Row(
