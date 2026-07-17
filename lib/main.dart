@@ -68,10 +68,13 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     };
 
+    final mainColor = Colors.blue.withValues(alpha: .5);
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: mainColor,
         title: Text(widget.title),
+        centerTitle: false,
       ),
       body: SafeArea(
         child: Column(
@@ -98,9 +101,7 @@ class _MyHomePageState extends State<MyHomePage> {
             // ),
             Container(
               width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.blue.withValues(alpha: .5),
-              ),
+              decoration: BoxDecoration(color: mainColor),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10.0),
                 child: CustomCalendar.month(
