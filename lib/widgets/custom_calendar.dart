@@ -2,6 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:test_calendar/widgets/calendar_day_widget.dart';
 
 class CustomCalendar extends StatefulWidget {
+  static const int defaultScrollLimit = 5000;
+  static const double _weekHeight = 40.0;
+  static const double _monthHeight = _weekHeight * 6;
+
+  static const List<String> _dayNames = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
+  static const List<String> _monthNames = [
+    'Enero',
+    'Febrero',
+    'Marzo',
+    'Abril',
+    'Mayo',
+    'Junio',
+    'Julio',
+    'Agosto',
+    'Septiembre',
+    'Octubre',
+    'Noviembre',
+    'Diciembre',
+  ];
+
   final bool showFullCalendar;
   final Map<DateTime, ({int count, Color color})>? events;
   final int scrollBackLimit;
@@ -12,8 +32,8 @@ class CustomCalendar extends StatefulWidget {
   const CustomCalendar.week({
     super.key,
     this.events,
-    this.scrollBackLimit = 5000,
-    this.scrollForwardLimit = 5000,
+    this.scrollBackLimit = defaultScrollLimit,
+    this.scrollForwardLimit = defaultScrollLimit,
     this.onPageChanged,
     this.onDaySelected,
   }) : showFullCalendar = false;
@@ -21,8 +41,8 @@ class CustomCalendar extends StatefulWidget {
   const CustomCalendar.month({
     super.key,
     this.events,
-    this.scrollBackLimit = 5000,
-    this.scrollForwardLimit = 5000,
+    this.scrollBackLimit = defaultScrollLimit,
+    this.scrollForwardLimit = defaultScrollLimit,
     this.onPageChanged,
     this.onDaySelected,
   }) : showFullCalendar = true;
@@ -63,15 +83,30 @@ class _CustomCalendarState extends State<CustomCalendar> {
     }
   }
 
+  bool _isSameDay(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
+  }
+
+  DateTime _getSunday(DateTime date) {
+    int offset = date.weekday == 7 ? 0 : date.weekday;
+    return date.subtract(Duration(days: offset));
+  }
+
   void _notifyDateChanged(int pageIndex) {
     if (widget.onPageChanged == null) return;
-    DateTime now = DateTime.now();
-    int offset = now.weekday == 7 ? 0 : now.weekday;
-    DateTime sunday = now.subtract(Duration(days: offset));
-    int currentOffset = pageIndex - widget.scrollBackLimit;
-    DateTime currentTargetDate = widget.showFullCalendar
-        ? DateTime(now.year, now.month + currentOffset, 1)
-        : sunday.add(Duration(days: currentOffset * 7));
+    
+    final DateTime now = DateTime.now();
+    final int currentOffset = pageIndex - widget.scrollBackLimit;
+    
+    DateTime currentTargetDate;
+    if (widget.showFullCalendar) {
+      currentTargetDate = DateTime(now.year, now.month + currentOffset, 1);
+    } else {
+      currentTargetDate = _getSunday(now).add(Duration(days: currentOffset * 7));
+    }
+    
     widget.onPageChanged!(currentTargetDate);
   }
 
@@ -83,32 +118,18 @@ class _CustomCalendarState extends State<CustomCalendar> {
 
   @override
   Widget build(BuildContext context) {
-    DateTime now = DateTime.now();
-    int offset = now.weekday == 7 ? 0 : now.weekday;
-    DateTime sunday = now.subtract(Duration(days: offset));
-    List<String> dayNames = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
-    List<String> monthNames = [
-      'Enero',
-      'Febrero',
-      'Marzo',
-      'Abril',
-      'Mayo',
-      'Junio',
-      'Julio',
-      'Agosto',
-      'Septiembre',
-      'Octubre',
-      'Noviembre',
-      'Diciembre',
-    ];
+    final DateTime now = DateTime.now();
+    final int currentOffset = _currentPage - widget.scrollBackLimit;
 
-    int currentOffset = _currentPage - widget.scrollBackLimit;
-    DateTime currentTargetDate = widget.showFullCalendar
-        ? DateTime(now.year, now.month + currentOffset, 1)
-        : sunday.add(Duration(days: currentOffset * 7));
+    DateTime currentTargetDate;
+    if (widget.showFullCalendar) {
+      currentTargetDate = DateTime(now.year, now.month + currentOffset, 1);
+    } else {
+      currentTargetDate = _getSunday(now).add(Duration(days: currentOffset * 7));
+    }
 
-    String currentMonthName = monthNames[currentTargetDate.month - 1];
-    String currentYear = currentTargetDate.year.toString();
+    final String currentMonthName = CustomCalendar._monthNames[currentTargetDate.month - 1];
+    final String currentYear = currentTargetDate.year.toString();
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -128,7 +149,7 @@ class _CustomCalendarState extends State<CustomCalendar> {
             return Expanded(
               child: Center(
                 child: Text(
-                  dayNames[index],
+                  CustomCalendar._dayNames[index],
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
@@ -139,7 +160,9 @@ class _CustomCalendarState extends State<CustomCalendar> {
         AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
-          height: widget.showFullCalendar ? 240 : 40,
+          height: widget.showFullCalendar
+              ? CustomCalendar._monthHeight
+              : CustomCalendar._weekHeight,
           child: PageView.builder(
             controller: _pageController,
             itemCount: widget.scrollBackLimit + 1 + widget.scrollForwardLimit,
@@ -153,19 +176,17 @@ class _CustomCalendarState extends State<CustomCalendar> {
               int pageOffset = pageIndex - widget.scrollBackLimit;
 
               if (!widget.showFullCalendar) {
+                final DateTime sunday = _getSunday(now);
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: List.generate(7, (index) {
-                    DateTime currentDay = sunday.add(
+                    final DateTime currentDay = sunday.add(
                       Duration(days: index + (pageOffset * 7)),
                     );
-                    bool isToday =
-                        currentDay.year == now.year &&
-                        currentDay.month == now.month &&
-                        currentDay.day == now.day;
+                    
                     return CalendarDayWidget(
                       currentDay: currentDay,
-                      isToday: isToday,
+                      isToday: _isSameDay(currentDay, now),
                       isCurrentMonth: true,
                       events: widget.events,
                       onTap: widget.onDaySelected != null
@@ -175,39 +196,31 @@ class _CustomCalendarState extends State<CustomCalendar> {
                   }),
                 );
               } else {
-                DateTime targetMonth = DateTime(
+                final DateTime targetMonth = DateTime(
                   now.year,
                   now.month + pageOffset,
                   1,
                 );
-                int firstDayWeekday = targetMonth.weekday;
-                int daysToSubtract = firstDayWeekday == 7 ? 0 : firstDayWeekday;
-                DateTime startGridDate = targetMonth.subtract(
-                  Duration(days: daysToSubtract),
-                );
+                final DateTime startGridDate = _getSunday(targetMonth);
 
                 return SingleChildScrollView(
                   physics: const NeverScrollableScrollPhysics(),
                   child: Column(
                     children: List.generate(6, (weekIndex) {
                       return SizedBox(
-                        height: 40,
+                        height: CustomCalendar._weekHeight,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: List.generate(7, (dayIndex) {
-                            DateTime currentDay = startGridDate.add(
+                            final DateTime currentDay = startGridDate.add(
                               Duration(days: weekIndex * 7 + dayIndex),
                             );
-                            bool isToday =
-                                currentDay.year == now.year &&
-                                currentDay.month == now.month &&
-                                currentDay.day == now.day;
                             bool isCurrentMonth =
                                 currentDay.month == targetMonth.month;
 
                             return CalendarDayWidget(
                               currentDay: currentDay,
-                              isToday: isToday,
+                              isToday: _isSameDay(currentDay, now),
                               isCurrentMonth: isCurrentMonth,
                               events: widget.events,
                               onTap: widget.onDaySelected != null
