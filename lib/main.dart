@@ -76,62 +76,45 @@ class _MyHomePageState extends State<MyHomePage> {
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Mostrar calendario completo',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Switch(
-                    value: _showFullCalendar,
-                    onChanged: (value) {
-                      setState(() {
-                        _showFullCalendar = value;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.symmetric(horizontal: 10.0),
+            //   child: Row(
+            //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //     children: [
+            //       const Text(
+            //         'Mostrar calendario completo',
+            //         style: TextStyle(fontWeight: FontWeight.bold),
+            //       ),
+            //       Switch(
+            //         value: _showFullCalendar,
+            //         onChanged: (value) {
+            //           setState(() {
+            //             _showFullCalendar = value;
+            //           });
+            //         },
+            //       ),
+            //     ],
+            //   ),
+            // ),
             Container(
-              margin: const EdgeInsets.all(10),
               width: double.infinity,
               decoration: BoxDecoration(
                 color: Colors.blue.withValues(alpha: .5),
-                borderRadius: BorderRadius.circular(10),
               ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10.0),
-                child: _showFullCalendar
-                    ? CustomCalendar.month(
-                        key: const ValueKey('month_calendar'),
-                        events: dummyEvents,
-                        onPageChanged: (date) {
-                          print('Mes actual: \${date.month} / \${date.year}');
-                        },
-                        onDaySelected: (date) {
-                          print(
-                            'Día seleccionado: \${date.day}/\${date.month}/\${date.year}',
-                          );
-                        },
-                      )
-                    : CustomCalendar.week(
-                        key: const ValueKey('week_calendar'),
-                        events: dummyEvents,
-                        onPageChanged: (date) {
-                          print(
-                            'Semana actual empieza el: \${date.day}/\${date.month}/\${date.year}',
-                          );
-                        },
-                        onDaySelected: (date) {
-                          print(
-                            'Día seleccionado: \${date.day}/\${date.month}/\${date.year}',
-                          );
-                        },
-                      ),
+                child: CustomCalendar.month(
+                  key: const ValueKey('month_calendar'),
+                  events: dummyEvents,
+                  onPageChanged: (date) {
+                    print('Mes actual: \${date.month} / \${date.year}');
+                  },
+                  onDaySelected: (date) {
+                    print(
+                      'Día seleccionado: \${date.day}/\${date.month}/\${date.year}',
+                    );
+                  },
+                ),
               ),
             ),
           ],
