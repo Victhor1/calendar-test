@@ -50,6 +50,31 @@ class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   bool _showFullCalendar = false;
 
+  final GlobalKey _calendarKey = GlobalKey();
+  double _minTop = 130.0; // Valores iniciales de fallback
+  double _maxTop = 330.0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _calculateDynamicHeights();
+    });
+  }
+
+  void _calculateDynamicHeights() {
+    final RenderBox? renderBox =
+        _calendarKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox != null) {
+      final size = renderBox.size;
+      setState(() {
+        _maxTop = size.height;
+        // La diferencia exacta para ocultar 5 semanas (40px cada una) y el padding inferior (20px)
+        _minTop = _maxTop - (5 * 40.0) - 20.0;
+      });
+    }
+  }
+
   void _incrementCounter() {
     setState(() {
       _counter++;
@@ -89,6 +114,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     left: 0,
                     right: 0,
                     child: Container(
+                      key: _calendarKey,
                       width: double.infinity,
                       decoration: BoxDecoration(color: mainColor),
                       child: Padding(
@@ -109,10 +135,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                   // Draggable Bottom Sheet
-                  const DraggableBottomSheet(
-                    minTop: 130.0,
-                    maxTop: 330.0,
-                    child: Center(
+                  DraggableBottomSheet(
+                    minTop: _minTop,
+                    maxTop: _maxTop,
+                    child: const Center(
                       child: Text('Contenido adicional aquí'),
                     ),
                   ),

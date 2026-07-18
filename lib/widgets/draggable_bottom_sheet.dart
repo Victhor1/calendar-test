@@ -38,6 +38,22 @@ class _DraggableBottomSheetState extends State<DraggableBottomSheet>
   }
 
   @override
+  void didUpdateWidget(DraggableBottomSheet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.minTop != oldWidget.minTop || widget.maxTop != oldWidget.maxTop) {
+      if (_currentTop == oldWidget.minTop) {
+        _currentTop = widget.minTop;
+      } else if (_currentTop == oldWidget.maxTop) {
+        _currentTop = widget.maxTop;
+      } else {
+        // Clamp current top to the new bounds
+        if (_currentTop < widget.minTop) _currentTop = widget.minTop;
+        if (_currentTop > widget.maxTop) _currentTop = widget.maxTop;
+      }
+    }
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
