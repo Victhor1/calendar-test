@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'widgets/custom_calendar.dart';
+import 'widgets/draggable_bottom_sheet.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,7 +30,7 @@ class MyApp extends StatelessWidget {
         //
         // This works for code too, not just values: Most code changes can be
         // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
@@ -79,43 +80,43 @@ class _MyHomePageState extends State<MyHomePage> {
       body: SafeArea(
         child: Column(
           children: [
-            // Padding(
-            //   padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            //   child: Row(
-            //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //     children: [
-            //       const Text(
-            //         'Mostrar calendario completo',
-            //         style: TextStyle(fontWeight: FontWeight.bold),
-            //       ),
-            //       Switch(
-            //         value: _showFullCalendar,
-            //         onChanged: (value) {
-            //           setState(() {
-            //             _showFullCalendar = value;
-            //           });
-            //         },
-            //       ),
-            //     ],
-            //   ),
-            // ),
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(color: mainColor),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10.0),
-                child: CustomCalendar.month(
-                  key: const ValueKey('month_calendar'),
-                  events: dummyEvents,
-                  onPageChanged: (date) {
-                    print('Mes actual: \${date.month} / \${date.year}');
-                  },
-                  onDaySelected: (date) {
-                    print(
-                      'Día seleccionado: \${date.day}/\${date.month}/\${date.year}',
-                    );
-                  },
-                ),
+            Expanded(
+              child: Stack(
+                children: [
+                  // Calendar Background
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(color: mainColor),
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 10.0, bottom: 20.0),
+                        child: CustomCalendar.month(
+                          key: const ValueKey('month_calendar'),
+                          events: dummyEvents,
+                          onPageChanged: (date) {
+                            print('Mes actual: ${date.month} / ${date.year}');
+                          },
+                          onDaySelected: (date) {
+                            print(
+                              'Día seleccionado: ${date.day}/${date.month}/${date.year}',
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Draggable Bottom Sheet
+                  const DraggableBottomSheet(
+                    minTop: 130.0,
+                    maxTop: 330.0,
+                    child: Center(
+                      child: Text('Contenido adicional aquí'),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
