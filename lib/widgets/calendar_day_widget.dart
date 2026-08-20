@@ -23,7 +23,7 @@ class CalendarDayWidget extends StatelessWidget {
     int count = 0;
     Color eventColor = Colors.blueAccent;
 
-    if (events != null) {
+    if (isCurrentMonth && events != null) {
       DateTime key = DateTime(
         currentDay.year,
         currentDay.month,
@@ -35,15 +35,17 @@ class CalendarDayWidget extends StatelessWidget {
       }
     }
 
+    final bool effectivelySelected = isCurrentMonth && isSelected;
+
     return Expanded(
       child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
+        onTap: isCurrentMonth ? onTap : null,
+        behavior: isCurrentMonth ? HitTestBehavior.opaque : HitTestBehavior.deferToChild,
         child: Center(
           child: Container(
             width: 45,
             height: 45,
-            decoration: isSelected
+            decoration: effectivelySelected
                 ? BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
@@ -55,9 +57,10 @@ class CalendarDayWidget extends StatelessWidget {
                 Text(
                   currentDay.day.toString(),
                   style: TextStyle(
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontWeight:
+                        effectivelySelected ? FontWeight.bold : FontWeight.normal,
                     color: isCurrentMonth
-                        ? (isSelected ? Colors.black : null)
+                        ? (effectivelySelected ? Colors.black : null)
                         : Colors.grey.withValues(alpha: .5),
                   ),
                 ),
@@ -74,7 +77,7 @@ class CalendarDayWidget extends StatelessWidget {
                             width: 10,
                             height: 10,
                             decoration: BoxDecoration(
-                              color: isSelected
+                              color: effectivelySelected
                                   ? eventColor.withValues(alpha: 0.8)
                                   : eventColor,
                               shape: BoxShape.circle,

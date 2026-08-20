@@ -266,11 +266,15 @@ class _CustomCalendarState extends State<CustomCalendar> {
 
                             return CalendarDayWidget(
                               currentDay: currentDay,
-                              isSelected: _isSameDay(currentDay, _selectedDate),
-                              isToday: _isSameDay(currentDay, now),
+                              isSelected: isCurrentMonth &&
+                                  _isSameDay(currentDay, _selectedDate),
+                              isToday: isCurrentMonth &&
+                                  _isSameDay(currentDay, now),
                               isCurrentMonth: isCurrentMonth,
-                              events: widget.events,
-                              onTap: () => _onDaySelected(currentDay),
+                              events: isCurrentMonth ? widget.events : null,
+                              onTap: isCurrentMonth
+                                  ? () => _onDaySelected(currentDay)
+                                  : null,
                             );
                           }),
                         ),
