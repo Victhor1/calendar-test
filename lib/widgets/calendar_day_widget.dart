@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class CalendarDayWidget extends StatelessWidget {
   final DateTime currentDay;
+  final bool isSelected;
   final bool isToday;
   final bool isCurrentMonth;
   final Map<DateTime, ({int count, Color color})>? events;
@@ -10,7 +11,8 @@ class CalendarDayWidget extends StatelessWidget {
   const CalendarDayWidget({
     super.key,
     required this.currentDay,
-    required this.isToday,
+    this.isSelected = false,
+    this.isToday = false,
     required this.isCurrentMonth,
     this.events,
     this.onTap,
@@ -41,7 +43,7 @@ class CalendarDayWidget extends StatelessWidget {
           child: Container(
             width: 45,
             height: 45,
-            decoration: isToday
+            decoration: isSelected
                 ? BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
@@ -53,9 +55,9 @@ class CalendarDayWidget extends StatelessWidget {
                 Text(
                   currentDay.day.toString(),
                   style: TextStyle(
-                    fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                     color: isCurrentMonth
-                        ? (isToday ? Colors.black : null)
+                        ? (isSelected ? Colors.black : null)
                         : Colors.grey.withValues(alpha: .5),
                   ),
                 ),
@@ -72,7 +74,7 @@ class CalendarDayWidget extends StatelessWidget {
                             width: 10,
                             height: 10,
                             decoration: BoxDecoration(
-                              color: isToday
+                              color: isSelected
                                   ? eventColor.withValues(alpha: 0.8)
                                   : eventColor,
                               shape: BoxShape.circle,

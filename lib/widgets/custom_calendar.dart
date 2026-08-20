@@ -4,7 +4,7 @@ import 'package:test_calendar/widgets/calendar_day_widget.dart';
 class CustomCalendar extends StatefulWidget {
   static const int defaultScrollLimit = 5000;
   static const double _weekHeight = 40.0;
-  static const double _monthHeight = (_weekHeight * 6) + 10.0;
+  // static const double _monthHeight = (_weekHeight * 6) + 10.0;
 
   static const List<String> _dayNames = [
     'DOM',
@@ -32,6 +32,7 @@ class CustomCalendar extends StatefulWidget {
 
   final bool showFullCalendar;
   final bool singleLetterDayNames;
+  final DateTime? selectedDate;
   final Map<DateTime, ({int count, Color color})>? events;
   final int scrollBackLimit;
   final int scrollForwardLimit;
@@ -45,6 +46,7 @@ class CustomCalendar extends StatefulWidget {
     this.scrollBackLimit = defaultScrollLimit,
     this.scrollForwardLimit = defaultScrollLimit,
     this.singleLetterDayNames = false,
+    this.selectedDate,
     this.onPageChanged,
     this.onDaySelected,
     this.dragProgress,
@@ -56,6 +58,7 @@ class CustomCalendar extends StatefulWidget {
     this.scrollBackLimit = defaultScrollLimit,
     this.scrollForwardLimit = defaultScrollLimit,
     this.singleLetterDayNames = false,
+    this.selectedDate,
     this.onPageChanged,
     this.onDaySelected,
     this.dragProgress,
@@ -68,12 +71,14 @@ class CustomCalendar extends StatefulWidget {
 class _CustomCalendarState extends State<CustomCalendar> {
   late PageController _pageController;
   late int _currentPage;
+  late DateTime _selectedDate;
 
   @override
   void initState() {
     super.initState();
     _currentPage = widget.scrollBackLimit;
     _pageController = PageController(initialPage: _currentPage);
+    _selectedDate = widget.selectedDate ?? DateTime.now();
     if (widget.onPageChanged != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _notifyDateChanged(_currentPage);
@@ -84,17 +89,30 @@ class _CustomCalendarState extends State<CustomCalendar> {
   @override
   void didUpdateWidget(CustomCalendar oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.selectedDate != null &&
+        widget.selectedDate != oldWidget.selectedDate) {
+      _selectedDate = widget.selectedDate!;
+    }
     if (widget.showFullCalendar != oldWidget.showFullCalendar ||
-        widget.scrollBackLimit != oldWidget.scrollBackLimit) {
+        widget.scrollBackLimit != oldWidget.scrollBackLimit ||
+        widget.scrollForwardLimit != oldWidget.scrollForwardLimit) {
       _currentPage = widget.scrollBackLimit;
-      _pageController.dispose();
-      _pageController = PageController(initialPage: _currentPage);
+      if (_pageController.hasClients) {
+        _pageController.jumpToPage(_currentPage);
+      }
       if (widget.onPageChanged != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _notifyDateChanged(_currentPage);
         });
       }
     }
+  }
+
+  void _onDaySelected(DateTime date) {
+    setState(() {
+      _selectedDate = date;
+    });
+    widget.onDaySelected?.call(date);
   }
 
   bool _isSameDay(DateTime date1, DateTime date2) {
@@ -110,17 +128,19 @@ class _CustomCalendarState extends State<CustomCalendar> {
 
   void _notifyDateChanged(int pageIndex) {
     if (widget.onPageChanged == null) return;
-    
+
     final DateTime now = DateTime.now();
     final int currentOffset = pageIndex - widget.scrollBackLimit;
-    
+
     DateTime currentTargetDate;
     if (widget.showFullCalendar) {
       currentTargetDate = DateTime(now.year, now.month + currentOffset, 1);
     } else {
-      currentTargetDate = _getSunday(now).add(Duration(days: currentOffset * 7));
+      currentTargetDate = _getSunday(
+        now,
+      ).add(Duration(days: currentOffset * 7));
     }
-    
+
     widget.onPageChanged!(currentTargetDate);
   }
 
@@ -139,10 +159,13 @@ class _CustomCalendarState extends State<CustomCalendar> {
     if (widget.showFullCalendar) {
       currentTargetDate = DateTime(now.year, now.month + currentOffset, 1);
     } else {
-      currentTargetDate = _getSunday(now).add(Duration(days: currentOffset * 7));
+      currentTargetDate = _getSunday(
+        now,
+      ).add(Duration(days: currentOffset * 7));
     }
 
-    final String currentMonthName = CustomCalendar._monthNames[currentTargetDate.month - 1];
+    final String currentMonthName =
+        CustomCalendar._monthNames[currentTargetDate.month - 1];
     final String currentYear = currentTargetDate.year.toString();
 
     return Column(
@@ -207,15 +230,14 @@ class _CustomCalendarState extends State<CustomCalendar> {
                     final DateTime currentDay = sunday.add(
                       Duration(days: index + (pageOffset * 7)),
                     );
-                    
+
                     return CalendarDayWidget(
                       currentDay: currentDay,
+                      isSelected: _isSameDay(currentDay, _selectedDate),
                       isToday: _isSameDay(currentDay, now),
                       isCurrentMonth: true,
                       events: widget.events,
-                      onTap: widget.onDaySelected != null
-                          ? () => widget.onDaySelected!(currentDay)
-                          : null,
+                      onTap: () => _onDaySelected(currentDay),
                     );
                   }),
                 );
@@ -244,12 +266,11 @@ class _CustomCalendarState extends State<CustomCalendar> {
 
                             return CalendarDayWidget(
                               currentDay: currentDay,
+                              isSelected: _isSameDay(currentDay, _selectedDate),
                               isToday: _isSameDay(currentDay, now),
                               isCurrentMonth: isCurrentMonth,
                               events: widget.events,
-                              onTap: widget.onDaySelected != null
-                                  ? () => widget.onDaySelected!(currentDay)
-                                  : null,
+                              onTap: () => _onDaySelected(currentDay),
                             );
                           }),
                         ),
@@ -257,16 +278,19 @@ class _CustomCalendarState extends State<CustomCalendar> {
 
                       if (weekIndex == 0) {
                         return ValueListenableBuilder<double>(
-                          valueListenable: widget.dragProgress ?? ValueNotifier(0.0),
+                          valueListenable:
+                              widget.dragProgress ?? ValueNotifier(0.0),
                           builder: (context, progress, child) {
                             return Padding(
-                              padding: EdgeInsets.only(bottom: 10.0 * (1.0 - progress)),
+                              padding: EdgeInsets.only(
+                                bottom: 10.0 * (1.0 - progress),
+                              ),
                               child: weekRow,
                             );
                           },
                         );
                       }
-                      
+
                       return weekRow;
                     }),
                   ),

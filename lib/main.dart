@@ -47,8 +47,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-  bool _showFullCalendar = false;
+  // int _counter = 0;
+  // bool _showFullCalendar = false;
 
   final GlobalKey _calendarKey = GlobalKey();
   double _minTop = 130.0; // Valores iniciales de fallback
@@ -77,11 +77,11 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+  // void _incrementCounter() {
+  //   setState(() {
+  //     _counter++;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -134,6 +134,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               'Día seleccionado: ${date.day}/${date.month}/${date.year}',
                             );
                           },
+                          scrollBackLimit: 4,
+                          scrollForwardLimit: 4,
                         ),
                       ),
                     ),
