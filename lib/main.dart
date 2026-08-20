@@ -125,6 +125,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           key: const ValueKey('month_calendar'),
                           events: dummyEvents,
                           dragProgress: _dragProgress,
+                          singleLetterDayNames: true,
                           onPageChanged: (date) {
                             print('Mes actual: ${date.month} / ${date.year}');
                           },

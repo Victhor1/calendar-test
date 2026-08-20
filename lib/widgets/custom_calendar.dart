@@ -6,7 +6,15 @@ class CustomCalendar extends StatefulWidget {
   static const double _weekHeight = 40.0;
   static const double _monthHeight = (_weekHeight * 6) + 10.0;
 
-  static const List<String> _dayNames = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
+  static const List<String> _dayNames = [
+    'DOM',
+    'LUN',
+    'MAR',
+    'MIE',
+    'JUE',
+    'VIE',
+    'SAB',
+  ];
   static const List<String> _monthNames = [
     'Enero',
     'Febrero',
@@ -23,6 +31,7 @@ class CustomCalendar extends StatefulWidget {
   ];
 
   final bool showFullCalendar;
+  final bool singleLetterDayNames;
   final Map<DateTime, ({int count, Color color})>? events;
   final int scrollBackLimit;
   final int scrollForwardLimit;
@@ -35,6 +44,7 @@ class CustomCalendar extends StatefulWidget {
     this.events,
     this.scrollBackLimit = defaultScrollLimit,
     this.scrollForwardLimit = defaultScrollLimit,
+    this.singleLetterDayNames = false,
     this.onPageChanged,
     this.onDaySelected,
     this.dragProgress,
@@ -45,6 +55,7 @@ class CustomCalendar extends StatefulWidget {
     this.events,
     this.scrollBackLimit = defaultScrollLimit,
     this.scrollForwardLimit = defaultScrollLimit,
+    this.singleLetterDayNames = false,
     this.onPageChanged,
     this.onDaySelected,
     this.dragProgress,
@@ -149,10 +160,11 @@ class _CustomCalendarState extends State<CustomCalendar> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: List.generate(7, (index) {
+            final String dayName = CustomCalendar._dayNames[index];
             return Expanded(
               child: Center(
                 child: Text(
-                  CustomCalendar._dayNames[index],
+                  widget.singleLetterDayNames ? dayName[0] : dayName,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
