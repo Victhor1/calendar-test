@@ -4,12 +4,14 @@ class DraggableBottomSheet extends StatefulWidget {
   final double minTop;
   final double maxTop;
   final Widget child;
+  final ValueChanged<double>? onPositionChanged;
 
   const DraggableBottomSheet({
     super.key,
     required this.minTop,
     required this.maxTop,
     required this.child,
+    this.onPositionChanged,
   });
 
   @override
@@ -34,7 +36,18 @@ class _DraggableBottomSheetState extends State<DraggableBottomSheet>
       setState(() {
         _currentTop = _animation.value;
       });
+      _notifyPosition();
     });
+  }
+
+  void _notifyPosition() {
+    if (widget.onPositionChanged != null) {
+      double range = widget.maxTop - widget.minTop;
+      if (range > 0) {
+        double progress = (_currentTop - widget.minTop) / range;
+        widget.onPositionChanged!(progress.clamp(0.0, 1.0));
+      }
+    }
   }
 
   @override
@@ -71,6 +84,7 @@ class _DraggableBottomSheetState extends State<DraggableBottomSheet>
         _currentTop = widget.maxTop;
       }
     });
+    _notifyPosition();
   }
 
   void _handleDragEnd(DragEndDetails details) {

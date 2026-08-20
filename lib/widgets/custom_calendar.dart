@@ -4,7 +4,7 @@ import 'package:test_calendar/widgets/calendar_day_widget.dart';
 class CustomCalendar extends StatefulWidget {
   static const int defaultScrollLimit = 5000;
   static const double _weekHeight = 40.0;
-  static const double _monthHeight = _weekHeight * 6;
+  static const double _monthHeight = (_weekHeight * 6) + 10.0;
 
   static const List<String> _dayNames = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
   static const List<String> _monthNames = [
@@ -28,6 +28,7 @@ class CustomCalendar extends StatefulWidget {
   final int scrollForwardLimit;
   final ValueChanged<DateTime>? onPageChanged;
   final ValueChanged<DateTime>? onDaySelected;
+  final ValueNotifier<double>? dragProgress;
 
   const CustomCalendar.week({
     super.key,
@@ -36,6 +37,7 @@ class CustomCalendar extends StatefulWidget {
     this.scrollForwardLimit = defaultScrollLimit,
     this.onPageChanged,
     this.onDaySelected,
+    this.dragProgress,
   }) : showFullCalendar = false;
 
   const CustomCalendar.month({
@@ -45,6 +47,7 @@ class CustomCalendar extends StatefulWidget {
     this.scrollForwardLimit = defaultScrollLimit,
     this.onPageChanged,
     this.onDaySelected,
+    this.dragProgress,
   }) : showFullCalendar = true;
 
   @override
@@ -157,12 +160,21 @@ class _CustomCalendarState extends State<CustomCalendar> {
           }),
         ),
         const SizedBox(height: 10),
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          height: widget.showFullCalendar
-              ? CustomCalendar._monthHeight
-              : CustomCalendar._weekHeight,
+        ValueListenableBuilder<double>(
+          valueListenable: widget.dragProgress ?? ValueNotifier(0.0),
+          builder: (context, progress, child) {
+            double gap = 10.0 * (1.0 - progress);
+            return AnimatedContainer(
+              duration: widget.dragProgress != null
+                  ? Duration.zero
+                  : const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              height: widget.showFullCalendar
+                  ? (CustomCalendar._weekHeight * 6) + gap
+                  : CustomCalendar._weekHeight,
+              child: child,
+            );
+          },
           child: PageView.builder(
             controller: _pageController,
             itemCount: widget.scrollBackLimit + 1 + widget.scrollForwardLimit,
@@ -207,7 +219,7 @@ class _CustomCalendarState extends State<CustomCalendar> {
                   physics: const NeverScrollableScrollPhysics(),
                   child: Column(
                     children: List.generate(6, (weekIndex) {
-                      return SizedBox(
+                      Widget weekRow = SizedBox(
                         height: CustomCalendar._weekHeight,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -230,6 +242,20 @@ class _CustomCalendarState extends State<CustomCalendar> {
                           }),
                         ),
                       );
+
+                      if (weekIndex == 0) {
+                        return ValueListenableBuilder<double>(
+                          valueListenable: widget.dragProgress ?? ValueNotifier(0.0),
+                          builder: (context, progress, child) {
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: 10.0 * (1.0 - progress)),
+                              child: weekRow,
+                            );
+                          },
+                        );
+                      }
+                      
+                      return weekRow;
                     }),
                   ),
                 );

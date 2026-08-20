@@ -53,6 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final GlobalKey _calendarKey = GlobalKey();
   double _minTop = 130.0; // Valores iniciales de fallback
   double _maxTop = 330.0;
+  final ValueNotifier<double> _dragProgress = ValueNotifier<double>(0.0);
 
   @override
   void initState() {
@@ -68,9 +69,10 @@ class _MyHomePageState extends State<MyHomePage> {
     if (renderBox != null) {
       final size = renderBox.size;
       setState(() {
-        _maxTop = size.height;
-        // La diferencia exacta para ocultar 5 semanas (40px cada una) y el padding inferior (20px)
-        _minTop = _maxTop - (5 * 40.0) - 20.0;
+        // size.height incluye el gap inicial de 10px
+        _minTop = size.height - (5 * 40.0) - 20.0;
+        // _maxTop debe ser la altura del calendario cuando el gap es 0
+        _maxTop = size.height - 10.0;
       });
     }
   }
@@ -122,6 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: CustomCalendar.month(
                           key: const ValueKey('month_calendar'),
                           events: dummyEvents,
+                          dragProgress: _dragProgress,
                           onPageChanged: (date) {
                             print('Mes actual: ${date.month} / ${date.year}');
                           },
@@ -138,6 +141,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   DraggableBottomSheet(
                     minTop: _minTop,
                     maxTop: _maxTop,
+                    onPositionChanged: (progress) {
+                      _dragProgress.value = progress;
+                    },
                     child: const Center(
                       child: Text('Contenido adicional aquí'),
                     ),
