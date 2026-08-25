@@ -72,6 +72,7 @@ class _CustomCalendarState extends State<CustomCalendar> {
   late PageController _pageController;
   late int _currentPage;
   late DateTime _selectedDate;
+  late DateTime _baseDate;
 
   @override
   void initState() {
@@ -79,10 +80,37 @@ class _CustomCalendarState extends State<CustomCalendar> {
     _currentPage = widget.scrollBackLimit;
     _pageController = PageController(initialPage: _currentPage);
     _selectedDate = widget.selectedDate ?? DateTime.now();
+    _baseDate = widget.selectedDate ?? DateTime.now();
     if (widget.onPageChanged != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _notifyDateChanged(_currentPage);
       });
+    }
+  }
+
+  bool _isDateInCurrentPage(DateTime date, int pageIndex) {
+    int pageOffset = pageIndex - widget.scrollBackLimit;
+    if (widget.showFullCalendar) {
+      final DateTime targetMonth = DateTime(
+        _baseDate.year,
+        _baseDate.month + pageOffset,
+        1,
+      );
+      return date.year == targetMonth.year && date.month == targetMonth.month;
+    } else {
+      final DateTime sunday = _getSunday(_baseDate);
+      final DateTime weekStart = DateTime(
+        sunday.year,
+        sunday.month,
+        sunday.day + (pageOffset * 7),
+      );
+      final DateTime weekEnd = DateTime(
+        weekStart.year,
+        weekStart.month,
+        weekStart.day + 6,
+      );
+      final DateTime dateOnly = DateTime(date.year, date.month, date.day);
+      return !dateOnly.isBefore(weekStart) && !dateOnly.isAfter(weekEnd);
     }
   }
 
@@ -92,10 +120,23 @@ class _CustomCalendarState extends State<CustomCalendar> {
     if (widget.selectedDate != null &&
         widget.selectedDate != oldWidget.selectedDate) {
       _selectedDate = widget.selectedDate!;
+      if (!_isDateInCurrentPage(widget.selectedDate!, _currentPage)) {
+        _baseDate = widget.selectedDate!;
+        _currentPage = widget.scrollBackLimit;
+        if (_pageController.hasClients) {
+          _pageController.jumpToPage(_currentPage);
+        }
+        if (widget.onPageChanged != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _notifyDateChanged(_currentPage);
+          });
+        }
+      }
     }
     if (widget.showFullCalendar != oldWidget.showFullCalendar ||
         widget.scrollBackLimit != oldWidget.scrollBackLimit ||
         widget.scrollForwardLimit != oldWidget.scrollForwardLimit) {
+      _baseDate = _selectedDate;
       _currentPage = widget.scrollBackLimit;
       if (_pageController.hasClients) {
         _pageController.jumpToPage(_currentPage);
@@ -123,24 +164,26 @@ class _CustomCalendarState extends State<CustomCalendar> {
 
   DateTime _getSunday(DateTime date) {
     int offset = date.weekday == 7 ? 0 : date.weekday;
-    return date.subtract(Duration(days: offset));
+    return DateTime(date.year, date.month, date.day - offset);
+  }
+
+  DateTime _getTargetDate(int pageIndex) {
+    final int currentOffset = pageIndex - widget.scrollBackLimit;
+    if (widget.showFullCalendar) {
+      return DateTime(_baseDate.year, _baseDate.month + currentOffset, 1);
+    } else {
+      final DateTime sunday = _getSunday(_baseDate);
+      return DateTime(
+        sunday.year,
+        sunday.month,
+        sunday.day + (currentOffset * 7),
+      );
+    }
   }
 
   void _notifyDateChanged(int pageIndex) {
     if (widget.onPageChanged == null) return;
-
-    final DateTime now = DateTime.now();
-    final int currentOffset = pageIndex - widget.scrollBackLimit;
-
-    DateTime currentTargetDate;
-    if (widget.showFullCalendar) {
-      currentTargetDate = DateTime(now.year, now.month + currentOffset, 1);
-    } else {
-      currentTargetDate = _getSunday(
-        now,
-      ).add(Duration(days: currentOffset * 7));
-    }
-
+    final DateTime currentTargetDate = _getTargetDate(pageIndex);
     widget.onPageChanged!(currentTargetDate);
   }
 
@@ -153,16 +196,7 @@ class _CustomCalendarState extends State<CustomCalendar> {
   @override
   Widget build(BuildContext context) {
     final DateTime now = DateTime.now();
-    final int currentOffset = _currentPage - widget.scrollBackLimit;
-
-    DateTime currentTargetDate;
-    if (widget.showFullCalendar) {
-      currentTargetDate = DateTime(now.year, now.month + currentOffset, 1);
-    } else {
-      currentTargetDate = _getSunday(
-        now,
-      ).add(Duration(days: currentOffset * 7));
-    }
+    final DateTime currentTargetDate = _getTargetDate(_currentPage);
 
     final String currentMonthName =
         CustomCalendar._monthNames[currentTargetDate.month - 1];
@@ -223,12 +257,14 @@ class _CustomCalendarState extends State<CustomCalendar> {
               int pageOffset = pageIndex - widget.scrollBackLimit;
 
               if (!widget.showFullCalendar) {
-                final DateTime sunday = _getSunday(now);
+                final DateTime sunday = _getSunday(_baseDate);
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: List.generate(7, (index) {
-                    final DateTime currentDay = sunday.add(
-                      Duration(days: index + (pageOffset * 7)),
+                    final DateTime currentDay = DateTime(
+                      sunday.year,
+                      sunday.month,
+                      sunday.day + index + (pageOffset * 7),
                     );
 
                     return CalendarDayWidget(
@@ -243,8 +279,8 @@ class _CustomCalendarState extends State<CustomCalendar> {
                 );
               } else {
                 final DateTime targetMonth = DateTime(
-                  now.year,
-                  now.month + pageOffset,
+                  _baseDate.year,
+                  _baseDate.month + pageOffset,
                   1,
                 );
                 final DateTime startGridDate = _getSunday(targetMonth);
@@ -258,18 +294,21 @@ class _CustomCalendarState extends State<CustomCalendar> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: List.generate(7, (dayIndex) {
-                            final DateTime currentDay = startGridDate.add(
-                              Duration(days: weekIndex * 7 + dayIndex),
+                            final DateTime currentDay = DateTime(
+                              startGridDate.year,
+                              startGridDate.month,
+                              startGridDate.day + (weekIndex * 7 + dayIndex),
                             );
                             bool isCurrentMonth =
                                 currentDay.month == targetMonth.month;
 
                             return CalendarDayWidget(
                               currentDay: currentDay,
-                              isSelected: isCurrentMonth &&
+                              isSelected:
+                                  isCurrentMonth &&
                                   _isSameDay(currentDay, _selectedDate),
-                              isToday: isCurrentMonth &&
-                                  _isSameDay(currentDay, now),
+                              isToday:
+                                  isCurrentMonth && _isSameDay(currentDay, now),
                               isCurrentMonth: isCurrentMonth,
                               events: isCurrentMonth ? widget.events : null,
                               onTap: isCurrentMonth
