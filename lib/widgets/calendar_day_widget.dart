@@ -35,12 +35,14 @@ class CalendarDayWidget extends StatelessWidget {
       }
     }
 
-    final bool effectivelySelected = isCurrentMonth && isSelected;
+    final bool hasEvents = count > 0;
+    final bool isEnabled = isCurrentMonth && hasEvents;
+    final bool effectivelySelected = isEnabled && isSelected;
 
     return Expanded(
       child: GestureDetector(
-        onTap: isCurrentMonth ? onTap : null,
-        behavior: isCurrentMonth ? HitTestBehavior.opaque : HitTestBehavior.deferToChild,
+        onTap: isEnabled ? onTap : null,
+        behavior: isEnabled ? HitTestBehavior.opaque : HitTestBehavior.deferToChild,
         child: Center(
           child: Container(
             width: 45,
@@ -59,7 +61,7 @@ class CalendarDayWidget extends StatelessWidget {
                   style: TextStyle(
                     fontWeight:
                         effectivelySelected ? FontWeight.bold : FontWeight.normal,
-                    color: isCurrentMonth
+                    color: isEnabled
                         ? (effectivelySelected ? Colors.black : null)
                         : Colors.grey.withValues(alpha: .5),
                   ),
