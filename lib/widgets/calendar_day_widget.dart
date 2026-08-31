@@ -6,6 +6,7 @@ class CalendarDayWidget extends StatelessWidget {
   final bool isToday;
   final bool isCurrentMonth;
   final Map<DateTime, ({int count, Color color})>? events;
+  final bool disableDaysWithoutEvents;
   final VoidCallback? onTap;
 
   const CalendarDayWidget({
@@ -15,6 +16,7 @@ class CalendarDayWidget extends StatelessWidget {
     this.isToday = false,
     required this.isCurrentMonth,
     this.events,
+    this.disableDaysWithoutEvents = false,
     this.onTap,
   });
 
@@ -36,7 +38,8 @@ class CalendarDayWidget extends StatelessWidget {
     }
 
     final bool hasEvents = count > 0;
-    final bool isEnabled = isCurrentMonth && hasEvents;
+    final bool isEnabled =
+        isCurrentMonth && (!disableDaysWithoutEvents || hasEvents);
     final bool effectivelySelected = isEnabled && isSelected;
 
     return Expanded(

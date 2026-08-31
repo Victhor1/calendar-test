@@ -90,10 +90,10 @@ class _MyHomePageState extends State<MyHomePage> {
         count: 3,
         color: Colors.purple,
       ),
-      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day): (
-        count: 4,
-        color: Colors.orange,
-      ),
+      // DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day): (
+      //   count: 4,
+      //   color: Colors.orange,
+      // ),
     };
 
     final mainColor = Colors.blue.withValues(alpha: .5);
@@ -136,7 +136,6 @@ class _MyHomePageState extends State<MyHomePage> {
                           },
                           scrollBackLimit: 4,
                           scrollForwardLimit: 4,
-                          // selectedDate: DateTime(2026, 12, 31),
                         ),
                       ),
                     ),

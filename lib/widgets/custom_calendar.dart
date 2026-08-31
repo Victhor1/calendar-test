@@ -34,6 +34,7 @@ class CustomCalendar extends StatefulWidget {
   final bool singleLetterDayNames;
   final DateTime? selectedDate;
   final Map<DateTime, ({int count, Color color})>? events;
+  final bool disableDaysWithoutEvents;
   final int scrollBackLimit;
   final int scrollForwardLimit;
   final ValueChanged<DateTime>? onPageChanged;
@@ -43,6 +44,7 @@ class CustomCalendar extends StatefulWidget {
   const CustomCalendar.week({
     super.key,
     this.events,
+    this.disableDaysWithoutEvents = false,
     this.scrollBackLimit = defaultScrollLimit,
     this.scrollForwardLimit = defaultScrollLimit,
     this.singleLetterDayNames = false,
@@ -55,6 +57,7 @@ class CustomCalendar extends StatefulWidget {
   const CustomCalendar.month({
     super.key,
     this.events,
+    this.disableDaysWithoutEvents = false,
     this.scrollBackLimit = defaultScrollLimit,
     this.scrollForwardLimit = defaultScrollLimit,
     this.singleLetterDayNames = false,
@@ -273,6 +276,7 @@ class _CustomCalendarState extends State<CustomCalendar> {
                       isToday: _isSameDay(currentDay, now),
                       isCurrentMonth: true,
                       events: widget.events,
+                      disableDaysWithoutEvents: widget.disableDaysWithoutEvents,
                       onTap: () => _onDaySelected(currentDay),
                     );
                   }),
@@ -311,6 +315,8 @@ class _CustomCalendarState extends State<CustomCalendar> {
                                   isCurrentMonth && _isSameDay(currentDay, now),
                               isCurrentMonth: isCurrentMonth,
                               events: isCurrentMonth ? widget.events : null,
+                              disableDaysWithoutEvents:
+                                  widget.disableDaysWithoutEvents,
                               onTap: isCurrentMonth
                                   ? () => _onDaySelected(currentDay)
                                   : null,
