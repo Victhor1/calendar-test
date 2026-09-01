@@ -35,7 +35,7 @@ class CustomCalendar extends StatefulWidget {
   final DateTime? selectedDate;
   final Map<DateTime, ({int count, Color color})>? events;
   final bool disableDaysWithoutEvents;
-  final Axis scrollDirection;
+  final Axis? scrollDirection;
   final int scrollBackLimit;
   final int scrollForwardLimit;
   final ValueChanged<DateTime>? onPageChanged;
@@ -46,7 +46,7 @@ class CustomCalendar extends StatefulWidget {
     super.key,
     this.events,
     this.disableDaysWithoutEvents = false,
-    this.scrollDirection = Axis.horizontal,
+    this.scrollDirection,
     this.scrollBackLimit = defaultScrollLimit,
     this.scrollForwardLimit = defaultScrollLimit,
     this.singleLetterDayNames = false,
@@ -60,7 +60,7 @@ class CustomCalendar extends StatefulWidget {
     super.key,
     this.events,
     this.disableDaysWithoutEvents = false,
-    this.scrollDirection = Axis.horizontal,
+    this.scrollDirection,
     this.scrollBackLimit = defaultScrollLimit,
     this.scrollForwardLimit = defaultScrollLimit,
     this.singleLetterDayNames = false,
@@ -233,54 +233,56 @@ class _CustomCalendarState extends State<CustomCalendar> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        widget.scrollDirection == Axis.vertical
-                            ? Icons.keyboard_arrow_up
-                            : Icons.chevron_left,
+                if (widget.scrollDirection != null)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          widget.scrollDirection == Axis.vertical
+                              ? Icons.keyboard_arrow_up
+                              : Icons.chevron_left,
+                        ),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                          minWidth: 32,
+                          minHeight: 32,
+                        ),
+                        splashRadius: 18,
+                        onPressed: _currentPage > 0
+                            ? () {
+                                _pageController.previousPage(
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                );
+                              }
+                            : null,
                       ),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(
-                        minWidth: 32,
-                        minHeight: 32,
+                      IconButton(
+                        icon: Icon(
+                          widget.scrollDirection == Axis.vertical
+                              ? Icons.keyboard_arrow_down
+                              : Icons.chevron_right,
+                        ),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                          minWidth: 32,
+                          minHeight: 32,
+                        ),
+                        splashRadius: 18,
+                        onPressed: _currentPage <
+                                widget.scrollBackLimit +
+                                    widget.scrollForwardLimit
+                            ? () {
+                                _pageController.nextPage(
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                );
+                              }
+                            : null,
                       ),
-                      splashRadius: 18,
-                      onPressed: _currentPage > 0
-                          ? () {
-                              _pageController.previousPage(
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeInOut,
-                              );
-                            }
-                          : null,
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        widget.scrollDirection == Axis.vertical
-                            ? Icons.keyboard_arrow_down
-                            : Icons.chevron_right,
-                      ),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(
-                        minWidth: 32,
-                        minHeight: 32,
-                      ),
-                      splashRadius: 18,
-                      onPressed: _currentPage <
-                              widget.scrollBackLimit + widget.scrollForwardLimit
-                          ? () {
-                              _pageController.nextPage(
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeInOut,
-                              );
-                            }
-                          : null,
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
               ],
             ),
           ),
@@ -316,7 +318,7 @@ class _CustomCalendarState extends State<CustomCalendar> {
           },
           child: PageView.builder(
             controller: _pageController,
-            scrollDirection: widget.scrollDirection,
+            scrollDirection: widget.scrollDirection ?? Axis.horizontal,
             itemCount: widget.scrollBackLimit + 1 + widget.scrollForwardLimit,
             onPageChanged: (index) {
               setState(() {
