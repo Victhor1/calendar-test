@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class CalendarDayWidget extends StatelessWidget {
   final DateTime currentDay;
   final bool isSelected;
+  final bool isInitialSelected;
   final bool isToday;
   final bool isCurrentMonth;
   final Map<DateTime, ({int count, Color color})>? events;
@@ -13,6 +14,7 @@ class CalendarDayWidget extends StatelessWidget {
     super.key,
     required this.currentDay,
     this.isSelected = false,
+    this.isInitialSelected = false,
     this.isToday = false,
     required this.isCurrentMonth,
     this.events,
@@ -41,6 +43,20 @@ class CalendarDayWidget extends StatelessWidget {
     final bool isEnabled =
         isCurrentMonth && (!disableDaysWithoutEvents || hasEvents);
     final bool effectivelySelected = isEnabled && isSelected;
+    final bool effectivelyInitial = isEnabled && isInitialSelected;
+
+    BoxDecoration? decoration;
+    if (effectivelySelected) {
+      decoration = BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+      );
+    } else if (effectivelyInitial) {
+      decoration = BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(8),
+      );
+    }
 
     return Expanded(
       child: GestureDetector(
@@ -50,12 +66,7 @@ class CalendarDayWidget extends StatelessWidget {
           child: Container(
             width: 45,
             height: 45,
-            decoration: effectivelySelected
-                ? BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                  )
-                : null,
+            decoration: decoration,
             child: Stack(
               alignment: Alignment.center,
               children: [
@@ -63,7 +74,9 @@ class CalendarDayWidget extends StatelessWidget {
                   currentDay.day.toString(),
                   style: TextStyle(
                     fontWeight:
-                        effectivelySelected ? FontWeight.bold : FontWeight.normal,
+                        effectivelySelected
+                            ? FontWeight.bold
+                            : (effectivelyInitial ? FontWeight.w600 : FontWeight.normal),
                     color: isEnabled
                         ? (effectivelySelected ? Colors.black : null)
                         : Colors.grey.withValues(alpha: .5),

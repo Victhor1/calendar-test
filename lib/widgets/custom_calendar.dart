@@ -75,6 +75,7 @@ class _CustomCalendarState extends State<CustomCalendar> {
   late PageController _pageController;
   late int _currentPage;
   late DateTime _selectedDate;
+  late DateTime _initialSelectedDate;
   late DateTime _baseDate;
 
   @override
@@ -83,6 +84,7 @@ class _CustomCalendarState extends State<CustomCalendar> {
     _currentPage = widget.scrollBackLimit;
     _pageController = PageController(initialPage: _currentPage);
     _selectedDate = widget.selectedDate ?? DateTime.now();
+    _initialSelectedDate = widget.selectedDate ?? DateTime.now();
     _baseDate = widget.selectedDate ?? DateTime.now();
     if (widget.onPageChanged != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -123,6 +125,7 @@ class _CustomCalendarState extends State<CustomCalendar> {
     if (widget.selectedDate != null &&
         widget.selectedDate != oldWidget.selectedDate) {
       _selectedDate = widget.selectedDate!;
+      _initialSelectedDate = widget.selectedDate!;
       if (!_isDateInCurrentPage(widget.selectedDate!, _currentPage)) {
         _baseDate = widget.selectedDate!;
         _currentPage = widget.scrollBackLimit;
@@ -273,6 +276,10 @@ class _CustomCalendarState extends State<CustomCalendar> {
                     return CalendarDayWidget(
                       currentDay: currentDay,
                       isSelected: _isSameDay(currentDay, _selectedDate),
+                      isInitialSelected: _isSameDay(
+                        currentDay,
+                        _initialSelectedDate,
+                      ),
                       isToday: _isSameDay(currentDay, now),
                       isCurrentMonth: true,
                       events: widget.events,
@@ -311,6 +318,9 @@ class _CustomCalendarState extends State<CustomCalendar> {
                               isSelected:
                                   isCurrentMonth &&
                                   _isSameDay(currentDay, _selectedDate),
+                              isInitialSelected:
+                                  isCurrentMonth &&
+                                  _isSameDay(currentDay, _initialSelectedDate),
                               isToday:
                                   isCurrentMonth && _isSameDay(currentDay, now),
                               isCurrentMonth: isCurrentMonth,
