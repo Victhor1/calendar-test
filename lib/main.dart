@@ -136,6 +136,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           },
                           scrollBackLimit: 4,
                           scrollForwardLimit: 4,
+                          scrollDirection: Axis.vertical,
                         ),
                       ),
                     ),
