@@ -158,6 +158,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: const Center(
                       child: Text('Contenido adicional aquí'),
                     ),
+                    onExpansionChanged: (value) {
+                      print('Expanded: $value');
+                    },
                   ),
                 ],
               ),

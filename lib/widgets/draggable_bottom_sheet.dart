@@ -5,6 +5,7 @@ class DraggableBottomSheet extends StatefulWidget {
   final double maxTop;
   final Widget child;
   final ValueChanged<double>? onPositionChanged;
+  final ValueChanged<bool>? onExpansionChanged;
 
   const DraggableBottomSheet({
     super.key,
@@ -12,6 +13,7 @@ class DraggableBottomSheet extends StatefulWidget {
     required this.maxTop,
     required this.child,
     this.onPositionChanged,
+    this.onExpansionChanged,
   });
 
   @override
@@ -23,6 +25,22 @@ class DraggableBottomSheetState extends State<DraggableBottomSheet>
   late double _currentTop;
   late AnimationController _controller;
   late Animation<double> _animation;
+  bool _isExpanded = false;
+
+  bool get isExpanded => _isExpanded;
+
+  void _updateExpansionState() {
+    final bool currentlyExpanded = (_currentTop - widget.maxTop).abs() < 0.01;
+    final bool currentlyCollapsed = (_currentTop - widget.minTop).abs() < 0.01;
+
+    if (currentlyExpanded && !_isExpanded) {
+      _isExpanded = true;
+      widget.onExpansionChanged?.call(true);
+    } else if (currentlyCollapsed && _isExpanded) {
+      _isExpanded = false;
+      widget.onExpansionChanged?.call(false);
+    }
+  }
 
   void expand() {
     if (_controller.isAnimating) _controller.stop();
@@ -53,6 +71,7 @@ class DraggableBottomSheetState extends State<DraggableBottomSheet>
   void initState() {
     super.initState();
     _currentTop = widget.minTop;
+    _isExpanded = false;
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -62,6 +81,11 @@ class DraggableBottomSheetState extends State<DraggableBottomSheet>
         _currentTop = _animation.value;
       });
       _notifyPosition();
+    });
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _updateExpansionState();
+      }
     });
   }
 
