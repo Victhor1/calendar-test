@@ -40,6 +40,7 @@ class CustomCalendar extends StatefulWidget {
   final int scrollForwardLimit;
   final ValueChanged<DateTime>? onPageChanged;
   final ValueChanged<DateTime>? onDaySelected;
+  final VoidCallback? onHeaderTap;
   final ValueNotifier<double>? dragProgress;
 
   const CustomCalendar.week({
@@ -53,6 +54,7 @@ class CustomCalendar extends StatefulWidget {
     this.selectedDate,
     this.onPageChanged,
     this.onDaySelected,
+    this.onHeaderTap,
     this.dragProgress,
   }) : showFullCalendar = false;
 
@@ -67,6 +69,7 @@ class CustomCalendar extends StatefulWidget {
     this.selectedDate,
     this.onPageChanged,
     this.onDaySelected,
+    this.onHeaderTap,
     this.dragProgress,
   }) : showFullCalendar = true;
 
@@ -226,11 +229,15 @@ class _CustomCalendarState extends State<CustomCalendar> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '$currentMonthName $currentYear',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                GestureDetector(
+                  onTap: widget.onHeaderTap,
+                  behavior: HitTestBehavior.opaque,
+                  child: Text(
+                    '$currentMonthName $currentYear',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 if (widget.scrollDirection != null)

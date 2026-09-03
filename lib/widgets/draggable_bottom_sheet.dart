@@ -15,14 +15,39 @@ class DraggableBottomSheet extends StatefulWidget {
   });
 
   @override
-  State<DraggableBottomSheet> createState() => _DraggableBottomSheetState();
+  State<DraggableBottomSheet> createState() => DraggableBottomSheetState();
 }
 
-class _DraggableBottomSheetState extends State<DraggableBottomSheet>
+class DraggableBottomSheetState extends State<DraggableBottomSheet>
     with SingleTickerProviderStateMixin {
   late double _currentTop;
   late AnimationController _controller;
   late Animation<double> _animation;
+
+  void expand() {
+    if (_controller.isAnimating) _controller.stop();
+    _animation = Tween<double>(begin: _currentTop, end: widget.maxTop).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+    _controller.forward(from: 0);
+  }
+
+  void collapse() {
+    if (_controller.isAnimating) _controller.stop();
+    _animation = Tween<double>(begin: _currentTop, end: widget.minTop).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+    _controller.forward(from: 0);
+  }
+
+  void toggle() {
+    final middle = (widget.minTop + widget.maxTop) / 2;
+    if (_currentTop < middle) {
+      expand();
+    } else {
+      collapse();
+    }
+  }
 
   @override
   void initState() {

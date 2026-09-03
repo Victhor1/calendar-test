@@ -51,6 +51,8 @@ class _MyHomePageState extends State<MyHomePage> {
   // bool _showFullCalendar = false;
 
   final GlobalKey _calendarKey = GlobalKey();
+  final GlobalKey<DraggableBottomSheetState> _bottomSheetKey =
+      GlobalKey<DraggableBottomSheetState>();
   double _minTop = 130.0; // Valores iniciales de fallback
   double _maxTop = 330.0;
   final ValueNotifier<double> _dragProgress = ValueNotifier<double>(0.0);
@@ -126,6 +128,9 @@ class _MyHomePageState extends State<MyHomePage> {
                           events: dummyEvents,
                           dragProgress: _dragProgress,
                           singleLetterDayNames: true,
+                          onHeaderTap: () {
+                            _bottomSheetKey.currentState?.toggle();
+                          },
                           onPageChanged: (date) {
                             print('Mes actual: ${date.month} / ${date.year}');
                           },
@@ -144,6 +149,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   // Draggable Bottom Sheet
                   DraggableBottomSheet(
+                    key: _bottomSheetKey,
                     minTop: _minTop,
                     maxTop: _maxTop,
                     onPositionChanged: (progress) {
